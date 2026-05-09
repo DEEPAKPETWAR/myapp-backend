@@ -1,0 +1,243 @@
+// controllers/authController.js
+const User = require("../model/User");
+const bcrypt = require("bcryptjs");
+const generateToken = require("../utility/generateToken");
+
+
+// REGISTER 
+exports.register = async (req, res) => {
+  try {
+    const { name, email, password, phone, address } = req.body;
+
+    if (!name || !email || !password || !phone) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
+    const existing = await User.findOne({
+      $or: [{ email }, { phone }],
+    });
+
+    if (existing) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      address,
+    });
+
+    res.json({
+      message: "Registered successfully",
+      token: generateToken(user._id),
+    });
+
+  } catch (error) {
+    console.log("REGISTER ERROR:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+//  LOGIN
+exports.login = async (req, res) => {
+  try {
+    const { email, phone, password } = req.body;
+
+    const user = await User.findOne({
+      $or: [{ email }, { phone }],
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+
+    if (!match) {
+      return res.status(400).json({ message: "Invalid password" });
+    }
+
+    res.json({
+      message: "Login success",
+      token: generateToken(user._id),
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      },
+    });
+
+  } catch (error) {
+    console.log("LOGIN ERROR:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+//  PROFILE 
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select("-password");
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+// FORGOT PASSWORD
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    const user = await User.findOne({ phone });
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
+    user.resetOtp = otp;
+    user.resetOtpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+
+    await user.save();
+
+    console.log("OTP:", otp);
+
+    res.json({ message: "OTP sent" });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+//  VERIFY OTP 
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { phone, otp } = req.body;
+
+    const user = await User.findOne({ phone });
+
+    if (!user || user.resetOtp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    if (user.resetOtpExpiry < new Date()) {
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    res.json({ message: "OTP verified" });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+//  RESET PASSWORD 
+exports.resetPassword = async (req, res) => {
+  try {
+    const { phone, newPassword } = req.body;
+
+    if (!phone || !newPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const user = await User.findOne({ phone });
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    user.resetOtp = null;
+    user.resetOtpExpiry = null;
+
+    await user.save();
+
+    res.json({ message: "Password reset successful" });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// DELETE PROFILE 
+exports.deleteProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await User.findByIdAndDelete(req.userId);
+
+    res.json({ message: "User deleted successfully" });
+
+  } catch (error) {
+    console.log("DELETE ERROR:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+//  UPDATE PROFILE
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, phone, address } = req.body;
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if phone already exists (optional but important)
+    if (phone && phone !== user.phone) {
+      const exists = await User.findOne({ phone });
+      if (exists) {
+        return res.status(400).json({ message: "Phone already in use" });
+      }
+    }
+
+    user.name = name || user.name;
+    user.phone = phone || user.phone;
+    user.address = address || user.address;
+
+    await user.save();
+
+    res.json({
+      message: "Profile updated successfully",
+      user: {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+      },
+    });
+
+  } catch (error) {
+    console.log("UPDATE PROFILE ERROR:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
