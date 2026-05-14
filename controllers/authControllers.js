@@ -202,81 +202,30 @@ exports.getProfile = async (req, res) => {
   }
 };
 //  UPDATE PROFILE
-exports.updateProfile = async (
-  req,
-  res
-) => {
+exports.updateProfile = async (req, res) => {
   try {
-    const { name, phone, address } =
-      req.body;
+    const { name, phone, address } = req.body;
 
-    const user = await User.findById(
-      req.userId
-    );
+    const user = await User.findById(req.userId);
 
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // CHECK PHONE
-    if (
-      phone &&
-      phone !== user.phone
-    ) {
-      const exists =
-        await User.findOne({
-          phone,
-        });
-
-      if (exists) {
-        return res.status(400).json({
-          message:
-            "Phone already in use",
-        });
-      }
-    }
-
-    // UPDATE FIELDS
-    user.name = name || user.name;
-
-    user.phone = phone || user.phone;
-
-    user.address =
-      address || user.address;
-
-    // IMAGE
-    if (req.file) {
-      user.profileImage =
-        `${req.protocol}://${req.get(
-          "host"
-        )}/uploads/${req.file.filename}`;
-    }
+    user.name = name;
+    user.phone = phone;
+    user.address = address;
 
     await user.save();
 
-    res.json({
-      message:
-        "Profile updated successfully",
-
-      user: {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        address: user.address,
-        profileImage:
-          user.profileImage,
-      },
+    return res.json({
+      message: "Profile updated successfully",
+      user,
     });
-  } catch (error) {
-    console.log(
-      "UPDATE PROFILE ERROR:",
-      error
-    );
-
-    res.status(500).json({
-      message: error.message,
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Something went wrong",
     });
   }
 };
