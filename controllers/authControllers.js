@@ -204,13 +204,19 @@ exports.getProfile = async (req, res) => {
 //  UPDATE PROFILE
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, phone, address } = req.body;
+    console.log("USER ID:", req.userId);
+
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     const user = await User.findById(req.userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    const { name, phone, address } = req.body;
 
     user.name = name;
     user.phone = phone;
@@ -223,9 +229,9 @@ exports.updateProfile = async (req, res) => {
       user,
     });
   } catch (err) {
-    console.log(err);
+    console.log("UPDATE ERROR:", err);
     return res.status(500).json({
-      message: "Something went wrong",
+      message: err.message || "Something went wrong",
     });
   }
 };

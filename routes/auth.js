@@ -12,10 +12,11 @@ const upload =require("../middleware/upload")
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 router.get("/profile", authMiddleware, getProfile);
-// const upload = require("../middleware/upload");
-
-router.put("/update-profile", authMiddleware, updateProfile);
-router.delete("/delete-profile", authMiddleware, deleteProfile);
+router.put(
+  "/update-profile",
+  authMiddleware,
+  updateProfile
+);router.delete("/delete-profile", authMiddleware, deleteProfile);
 
 router.post("/forgot-password", authController.forgotPassword);
 router.post("/verify-otp", authController.verifyOtp);
