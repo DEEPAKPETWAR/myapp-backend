@@ -25,7 +25,7 @@ exports.register = async (req, res) => {
 
     const user = await User.create({
       name,
-      email,
+     email: email.trim().toLowerCase(),
       password: hashedPassword,
       phone,
       address,
@@ -48,23 +48,48 @@ exports.login = async (req, res) => {
   try {
     const { email, phone, password } = req.body;
 
-    const user = await User.findOne({
-      $or: [{ email }, { phone }],
-    });
+    console.log("BODY:", req.body);
 
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
+    let user = null;
+
+    // LOGIN WITH EMAIL
+    if (email) {
+      user = await User.findOne({
+        email: email.trim().toLowerCase(),
+      });
     }
 
-    const match = await bcrypt.compare(password, user.password);
+    // LOGIN WITH PHONE
+    else if (phone) {
+      user = await User.findOne({
+        phone: phone.trim(),
+      });
+    }
+
+    // USER NOT FOUND
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    }
+
+    // PASSWORD CHECK
+    const match = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!match) {
-      return res.status(400).json({ message: "Invalid password" });
+      return res.status(400).json({
+        message: "Invalid password",
+      });
     }
 
+    // SUCCESS
     res.json({
       message: "Login success",
       token: generateToken(user._id),
+
       user: {
         _id: user._id,
         name: user.name,
@@ -72,47 +97,12 @@ exports.login = async (req, res) => {
         phone: user.phone,
       },
     });
-
   } catch (error) {
     console.log("LOGIN ERROR:", error);
-    res.status(500).json({ message: error.message });
-  }
-};
-//  PROFILE 
-exports.getProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.userId).select("-password");
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
-
-// FORGOT PASSWORD
-exports.forgotPassword = async (req, res) => {
-  try {
-    const { phone } = req.body;
-
-    const user = await User.findOne({ phone });
-
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
-
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
-
-    user.resetOtp = otp;
-    user.resetOtpExpiry = new Date(Date.now() + 5 * 60 * 1000);
-
-    await user.save();
-
-    console.log("OTP:", otp);
-
-    res.json({ message: "OTP sent" });
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
@@ -232,6 +222,37 @@ exports.updateProfile = async (req, res) => {
     console.log("UPDATE ERROR:", err);
     return res.status(500).json({
       message: err.message || "Something went wrong",
+    });
+  }
+};
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    const user = await User.findOne({ phone });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Example OTP
+    const otp = "1234";
+
+    user.resetOtp = otp;
+    user.resetOtpExpiry = Date.now() + 5 * 60 * 1000;
+
+    await user.save();
+
+    res.json({
+      message: "OTP sent successfully",
+      otp,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
     });
   }
 };
