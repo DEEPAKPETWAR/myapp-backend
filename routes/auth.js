@@ -8,15 +8,12 @@ const {
   deleteProfile,
 } = require("../controllers/authControllers");
 const authMiddleware = require("../middleware/authMiddleware");
-const upload =require("../middleware/upload")
+// const upload =require("../middleware/upload")
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 router.get("/profile", authMiddleware, getProfile);
-router.put(
-  "/update-profile",
-  authMiddleware,
-  updateProfile
-);router.delete("/delete-profile", authMiddleware, deleteProfile);
+r
+router.delete("/delete-profile", authMiddleware, deleteProfile);
 
 router.post("/forgot-password", authController.forgotPassword);
 router.post("/verify-otp", authController.verifyOtp);
