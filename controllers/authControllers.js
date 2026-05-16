@@ -4,76 +4,97 @@ const bcrypt = require("bcryptjs");
 const generateToken = require("../utility/generateToken");
 
 
-// REGISTER 
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, phone, address } = req.body;
+    let { name, email, password, phone, address } =
+      req.body;
 
     if (!name || !email || !password || !phone) {
-      return res.status(400).json({ message: "All fields required" });
+      return res.status(400).json({
+        message: "All fields required",
+      });
     }
 
-    const existing = await User.findOne({
+    // Normalize values
+    email = email.trim().toLowerCase();
+    phone = phone.trim();
+
+    const existingUser = await User.findOne({
       $or: [{ email }, { phone }],
     });
 
-    if (existing) {
-      return res.status(400).json({ message: "User already exists" });
+    if (existingUser) {
+      return res.status(400).json({
+        message:
+          "User already exists with email or phone",
+      });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(
+      password,
+      10
+    );
 
     const user = await User.create({
       name,
-     email: email.trim().toLowerCase(),
+      email,
       password: hashedPassword,
       phone,
       address,
     });
 
-    res.json({
-      message: "Registered successfully",
+    res.status(201).json({
+      message: "Registration successful",
       token: generateToken(user._id),
+
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+      },
     });
 
   } catch (error) {
     console.log("REGISTER ERROR:", error);
-    res.status(500).json({ message: error.message });
+
+    res.status(500).json({
+      message: "Server error",
+    });
   }
 };
-
-
 //  LOGIN
 exports.login = async (req, res) => {
   try {
-    const { email, phone, password } = req.body;
-
-    console.log("BODY:", req.body);
+    let { email, phone, password } = req.body;
 
     let user = null;
 
-    // LOGIN WITH EMAIL
+    // Login with email
     if (email) {
+      email = email.trim().toLowerCase();
+
       user = await User.findOne({
-        email: email.trim().toLowerCase(),
+        email,
       });
     }
 
-    // LOGIN WITH PHONE
+    // Login with phone
     else if (phone) {
+      phone = phone.trim();
+
       user = await User.findOne({
-        phone: phone.trim(),
+        phone,
       });
     }
 
-    // USER NOT FOUND
     if (!user) {
       return res.status(400).json({
         message: "User not found",
       });
     }
 
-    // PASSWORD CHECK
     const match = await bcrypt.compare(
       password,
       user.password
@@ -85,9 +106,8 @@ exports.login = async (req, res) => {
       });
     }
 
-    // SUCCESS
-    res.json({
-      message: "Login success",
+    res.status(200).json({
+      message: "Login successful",
       token: generateToken(user._id),
 
       user: {
@@ -95,18 +115,19 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        address: user.address,
+        profileImage: user.profileImage,
       },
     });
+
   } catch (error) {
     console.log("LOGIN ERROR:", error);
 
     res.status(500).json({
-      message: error.message,
+      message: "Server error",
     });
   }
 };
-
-
 //  VERIFY OTP 
 exports.verifyOtp = async (req, res) => {
   try {
