@@ -260,9 +260,9 @@ exports.updateProfile = async (req, res) => {
     if (phone) user.phone = phone;
     if (address) user.address = address;
 
-  
     if (req.file) {
-      user.profileImage = `/uploads/${req.file.filename}`;
+      const baseUrl = "https://myapp-backend-vtdw.onrender.com";
+      user.profileImage = `${baseUrl}/uploads/${req.file.filename}`;
     }
 
     await user.save();
