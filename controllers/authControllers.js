@@ -246,39 +246,85 @@ exports.getProfile = async (req, res) => {
 //     });
 //   }
 // };
-exports.updateProfile = async (
-  req,
-  res
-) => {
+// exports.updateProfile = async (
+//   req,
+//   res
+// ) => {
+//   try {
+//     const user =
+//       await User.findById(
+//         req.userId
+//       );
+
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json({
+//           message:
+//             "User not found",
+//         });
+//     }
+
+//     const {
+//       name,
+//       phone,
+//       address,
+//     } = req.body;
+
+//     if (name)
+//       user.name = name;
+
+//     if (phone)
+//       user.phone = phone;
+
+//     if (address)
+//       user.address = address;
+
+//     if (req.file) {
+//       user.profileImage =
+//         `/uploads/${req.file.filename}`;
+//     }
+
+//     await user.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message:
+//         "Profile updated successfully",
+//       user,
+//     });
+//   } catch (err) {
+//     console.log(
+//       "UPDATE ERROR:",
+//       err
+//     );
+
+//     res.status(500).json({
+//       success: false,
+//       message:
+//         err.message,
+//     });
+//   }
+// };
+exports.updateProfile = async (req, res) => {
   try {
-    const user =
-      await User.findById(
-        req.userId
-      );
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+    console.log("USER ID:", req.userId);
+
+    const user = await User.findById(req.userId);
 
     if (!user) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "User not found",
-        });
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
 
-    const {
-      name,
-      phone,
-      address,
-    } = req.body;
+    const { name, phone, address } = req.body;
 
-    if (name)
-      user.name = name;
-
-    if (phone)
-      user.phone = phone;
-
-    if (address)
-      user.address = address;
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    if (address) user.address = address;
 
     if (req.file) {
       user.profileImage =
@@ -287,22 +333,20 @@ exports.updateProfile = async (
 
     await user.save();
 
-    res.status(200).json({
-      success: true,
+    return res.status(200).json({
       message:
         "Profile updated successfully",
       user,
     });
+
   } catch (err) {
     console.log(
-      "UPDATE ERROR:",
+      "BACKEND ERROR:",
       err
     );
 
-    res.status(500).json({
-      success: false,
-      message:
-        err.message,
+    return res.status(500).json({
+      message: err.message,
     });
   }
 };
