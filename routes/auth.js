@@ -22,9 +22,10 @@ router.get(
 );
 
 router.put(
-  "/update-profile",
-  authMiddleware,
-  updateProfile
+ "/profile/update",
+ authMiddleware,
+ upload.single("profileImage"),
+ updateProfile
 );
 
 router.delete(
