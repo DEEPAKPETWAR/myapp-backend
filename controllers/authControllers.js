@@ -252,12 +252,8 @@ exports.updateProfile = async (
 
     // save image url
     if (req.file) {
-
-      user.profileImage =
-        `${req.protocol}://${req.get(
-          "host"
-        )}/uploads/${req.file.filename}`;
-    }
+  user.profileImage = `https://myapp-backend-vtdw.onrender.com/uploads/${req.file.filename}`;
+}
 
     await user.save();
 
