@@ -246,34 +246,63 @@ exports.getProfile = async (req, res) => {
 //     });
 //   }
 // };
-exports.updateProfile = async (req, res) => {
+exports.updateProfile = async (
+  req,
+  res
+) => {
   try {
-    const user = await User.findById(req.userId);
+    const user =
+      await User.findById(
+        req.userId
+      );
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res
+        .status(404)
+        .json({
+          message:
+            "User not found",
+        });
     }
 
-    const { name, phone, address } = req.body;
+    const {
+      name,
+      phone,
+      address,
+    } = req.body;
 
-    if (name) user.name = name;
-    if (phone) user.phone = phone;
-    if (address) user.address = address;
+    if (name)
+      user.name = name;
+
+    if (phone)
+      user.phone = phone;
+
+    if (address)
+      user.address = address;
 
     if (req.file) {
-      const baseUrl = "https://myapp-backend-vtdw.onrender.com";
-      user.profileImage = `${baseUrl}/uploads/${req.file.filename}`;
+      user.profileImage =
+        `/uploads/${req.file.filename}`;
     }
 
     await user.save();
 
-    return res.json({
-      message: "Profile updated successfully",
+    res.status(200).json({
+      success: true,
+      message:
+        "Profile updated successfully",
       user,
     });
   } catch (err) {
-    return res.status(500).json({
-      message: err.message,
+    console.log(
+      "UPDATE ERROR:",
+      err
+    );
+
+    res.status(500).json({
+      success: false,
+      message:
+        err.message,
     });
   }
 };
