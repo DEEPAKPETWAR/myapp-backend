@@ -21,7 +21,12 @@ router.get(
   getProfile
 );
 
-router.put("/update-profile", upload.single("profileImage"), updateProfile);
+router.put(
+  "/update-profile",
+  authMiddleware,
+  upload.single("profileImage"),
+  updateProfile
+);
 
 router.delete(
   "/delete-profile",
