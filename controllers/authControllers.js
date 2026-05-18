@@ -213,39 +213,39 @@ exports.getProfile = async (req, res) => {
   }
 };
 //  UPDATE PROFILE
-// exports.updateProfile = async (req, res) => {
-//   try {
-//     console.log("USER ID:", req.userId);
+exports.updateProfile = async (req, res) => {
+  try {
+    console.log("USER ID:", req.userId);
 
-//     if (!req.userId) {
-//       return res.status(401).json({ message: "Unauthorized" });
-//     }
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-//     const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId);
 
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-//     const { name, phone, address } = req.body;
+    const { name, phone, address } = req.body;
 
-//     user.name = name;
-//     user.phone = phone;
-//     user.address = address;
+    user.name = name;
+    user.phone = phone;
+    user.address = address;
 
-//     await user.save();
+    await user.save();
 
-//     return res.json({
-//       message: "Profile updated successfully",
-//       user,
-//     });
-//   } catch (err) {
-//     console.log("UPDATE ERROR:", err);
-//     return res.status(500).json({
-//       message: err.message || "Something went wrong",
-//     });
-//   }
-// };
+    return res.json({
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (err) {
+    console.log("UPDATE ERROR:", err);
+    return res.status(500).json({
+      message: err.message || "Something went wrong",
+    });
+  }
+};
 // exports.updateProfile = async (
 //   req,
 //   res
@@ -306,50 +306,50 @@ exports.getProfile = async (req, res) => {
 //     });
 //   }
 // };
-exports.updateProfile = async (req, res) => {
-  try {
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file);
-    console.log("USER ID:", req.userId);
+// exports.updateProfile = async (req, res) => {
+//   try {
+//     console.log("BODY:", req.body);
+//     console.log("FILE:", req.file);
+//     console.log("USER ID:", req.userId);
 
-    const user = await User.findById(req.userId);
+//     const user = await User.findById(req.userId);
 
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
+//     if (!user) {
+//       return res.status(404).json({
+//         message: "User not found",
+//       });
+//     }
 
-    const { name, phone, address } = req.body;
+//     const { name, phone, address } = req.body;
 
-    if (name) user.name = name;
-    if (phone) user.phone = phone;
-    if (address) user.address = address;
+//     if (name) user.name = name;
+//     if (phone) user.phone = phone;
+//     if (address) user.address = address;
 
-    if (req.file) {
-      user.profileImage =
-        `/uploads/${req.file.filename}`;
-    }
+//     if (req.file) {
+//       user.profileImage =
+//         `/uploads/${req.file.filename}`;
+//     }
 
-    await user.save();
+//     await user.save();
 
-    return res.status(200).json({
-      message:
-        "Profile updated successfully",
-      user,
-    });
+//     return res.status(200).json({
+//       message:
+//         "Profile updated successfully",
+//       user,
+//     });
 
-  } catch (err) {
-    console.log(
-      "BACKEND ERROR:",
-      err
-    );
+//   } catch (err) {
+//     console.log(
+//       "BACKEND ERROR:",
+//       err
+//     );
 
-    return res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+//     return res.status(500).json({
+//       message: err.message,
+//     });
+//   }
+// };
 exports.forgotPassword = async (req, res) => {
   try {
     const { phone } = req.body;
