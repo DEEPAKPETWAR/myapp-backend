@@ -246,8 +246,43 @@ exports.getProfile = async (req, res) => {
 //     });
 //   }
 // };
+// exports.updateProfile = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.userId);
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     const { name, phone, address } = req.body;
+
+//     if (name) user.name = name;
+//     if (phone) user.phone = phone;
+//     if (address) user.address = address;
+
+//     if (req.file) {
+//       const baseUrl = "https://myapp-backend-vtdw.onrender.com";
+//       user.profileImage = `${baseUrl}/uploads/${req.file.filename}`;
+//     }
+
+//     await user.save();
+
+//     return res.json({
+//       message: "Profile updated successfully",
+//       user,
+//     });
+//   } catch (err) {
+//     return res.status(500).json({
+//       message: err.message,
+//     });
+//   }
+// };
 exports.updateProfile = async (req, res) => {
   try {
+    console.log("USER ID:", req.userId);
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
     const user = await User.findById(req.userId);
 
     if (!user) {
@@ -267,14 +302,10 @@ exports.updateProfile = async (req, res) => {
 
     await user.save();
 
-    return res.json({
-      message: "Profile updated successfully",
-      user,
-    });
+    return res.json({ message: "Profile updated", user });
   } catch (err) {
-    return res.status(500).json({
-      message: err.message,
-    });
+    console.log("UPDATE ERROR:", err);
+    return res.status(500).json({ message: err.message });
   }
 };
 exports.forgotPassword = async (req, res) => {
