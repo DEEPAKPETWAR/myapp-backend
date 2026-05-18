@@ -8,7 +8,7 @@ const {
   updateProfile,
   deleteProfile,
 } = require("../controllers/authControllers");
-
+const upload =require("../middleware/upload")
 const authMiddleware = require("../middleware/authMiddleware");
 
 router.post("/register", authController.register);
