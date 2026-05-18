@@ -213,36 +213,84 @@ exports.getProfile = async (req, res) => {
   }
 };
 //  UPDATE PROFILE
+// exports.updateProfile = async (req, res) => {
+//   try {
+//     console.log("USER ID:", req.userId);
+
+//     if (!req.userId) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
+
+//     const user = await User.findById(req.userId);
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     const { name, phone, address } = req.body;
+
+//     user.name = name;
+//     user.phone = phone;
+//     user.address = address;
+
+//     await user.save();
+
+//     return res.json({
+//       message: "Profile updated successfully",
+//       user,
+//     });
+//   } catch (err) {
+//     console.log("UPDATE ERROR:", err);
+//     return res.status(500).json({
+//       message: err.message || "Something went wrong",
+//     });
+//   }
+// };
 exports.updateProfile = async (req, res) => {
   try {
     console.log("USER ID:", req.userId);
 
     if (!req.userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
     }
 
     const user = await User.findById(req.userId);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
 
     const { name, phone, address } = req.body;
 
-    user.name = name;
-    user.phone = phone;
-    user.address = address;
+    // update text fields
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    if (address) user.address = address;
+
+    // update image if uploaded
+    if (req.file) {
+      user.profileImage =
+        `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    }
 
     await user.save();
 
-    return res.json({
+    return res.status(200).json({
+      success: true,
       message: "Profile updated successfully",
       user,
     });
+
   } catch (err) {
     console.log("UPDATE ERROR:", err);
+
     return res.status(500).json({
-      message: err.message || "Something went wrong",
+      message:
+        err.message || "Something went wrong",
     });
   }
 };
