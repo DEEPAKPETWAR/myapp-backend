@@ -22,12 +22,11 @@ router.get(
 );
 
 router.put(
- "/profile/update",
- authMiddleware,
- upload.single("profileImage"),
- updateProfile
+  "/update-profile",
+  authMiddleware,
+  upload.single("profileImage"),
+  authController.updateProfile
 );
-
 router.delete(
   "/delete-profile",
   authMiddleware,

@@ -213,64 +213,74 @@ exports.getProfile = async (req, res) => {
   }
 };
 //  UPDATE PROFILE
-// 
+// exports.updateProfile = async (req, res) => {
+//   try {
+//     console.log("USER ID:", req.userId);
+
+//     if (!req.userId) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
+
+//     const user = await User.findById(req.userId);
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     const { name, phone, address } = req.body;
+
+//     user.name = name;
+//     user.phone = phone;
+//     user.address = address;
+
+//     await user.save();
+
+//     return res.json({
+//       message: "Profile updated successfully",
+//       user,
+//     });
+//   } catch (err) {
+//     console.log("UPDATE ERROR:", err);
+//     return res.status(500).json({
+//       message: err.message || "Something went wrong",
+//     });
+//   }
+// };
+
 exports.updateProfile = async (
   req,
   res
 ) => {
   try {
-
-    const {
-      name,
-      phone,
-      address
-    } = req.body;
-
     const user =
       await User.findById(
         req.userId
       );
 
     if (!user) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "User not found"
-        });
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
 
-    user.name =
-      name || user.name;
-
-    user.phone =
-      phone || user.phone;
-
-    user.address =
-      address ||
-      user.address;
-
-    // save image url
     if (req.file) {
-  user.profileImage = `https://myapp-backend-vtdw.onrender.com/uploads/${req.file.filename}`;
-}
+      user.profileImage =
+        `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    }
 
     await user.save();
 
     res.json({
-      success:true,
-      user
+      success: true,
+      user,
     });
 
   } catch (error) {
-
     console.log(error);
 
     res.status(500).json({
-      message:
-      "Update failed"
+      message: "Server error",
     });
-
   }
 };
 exports.forgotPassword = async (req, res) => {
