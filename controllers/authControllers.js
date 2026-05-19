@@ -247,15 +247,9 @@ exports.getProfile = async (req, res) => {
 //   }
 // };
 
-exports.updateProfile = async (
-  req,
-  res
-) => {
+exports.updateProfile = async (req, res) => {
   try {
-    const user =
-      await User.findById(
-        req.userId
-      );
+    const user = await User.findById(req.userId);
 
     if (!user) {
       return res.status(404).json({
@@ -263,21 +257,29 @@ exports.updateProfile = async (
       });
     }
 
+    const { name, phone, address } = req.body;
+
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    if (address) user.address = address;
+
+    // ✅ IMAGE UPLOAD
     if (req.file) {
-      user.profileImage =
-        `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      const imageUrl = `${req.protocol}://${req.get(
+        "host"
+      )}/uploads/${req.file.filename}`;
+
+      user.profileImage = imageUrl;
     }
 
     await user.save();
 
-    res.json({
-      success: true,
+    res.status(200).json({
+      message: "Profile updated",
       user,
     });
-
   } catch (error) {
     console.log(error);
-
     res.status(500).json({
       message: "Server error",
     });
