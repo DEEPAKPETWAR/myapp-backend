@@ -212,79 +212,79 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-//  UPDATE PROFILE
-// exports.updateProfile = async (req, res) => {
-//   try {
-//     console.log("USER ID:", req.userId);
-
-//     if (!req.userId) {
-//       return res.status(401).json({ message: "Unauthorized" });
-//     }
-
-//     const user = await User.findById(req.userId);
-
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-
-//     const { name, phone, address } = req.body;
-
-//     user.name = name;
-//     user.phone = phone;
-//     user.address = address;
-
-//     await user.save();
-
-//     return res.json({
-//       message: "Profile updated successfully",
-//       user,
-//     });
-//   } catch (err) {
-//     console.log("UPDATE ERROR:", err);
-//     return res.status(500).json({
-//       message: err.message || "Something went wrong",
-//     });
-//   }
-// };
-
+ UPDATE PROFILE
 exports.updateProfile = async (req, res) => {
   try {
+    console.log("USER ID:", req.userId);
+
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const user = await User.findById(req.userId);
 
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const { name, phone, address } = req.body;
 
-    if (name) user.name = name;
-    if (phone) user.phone = phone;
-    if (address) user.address = address;
-
-    // ✅ IMAGE UPLOAD
-    if (req.file) {
-      const imageUrl = `${req.protocol}://${req.get(
-        "host"
-      )}/uploads/${req.file.filename}`;
-
-      user.profileImage = imageUrl;
-    }
+    user.name = name;
+    user.phone = phone;
+    user.address = address;
 
     await user.save();
 
-    res.status(200).json({
-      message: "Profile updated",
+    return res.json({
+      message: "Profile updated successfully",
       user,
     });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Server error",
+  } catch (err) {
+    console.log("UPDATE ERROR:", err);
+    return res.status(500).json({
+      message: err.message || "Something went wrong",
     });
   }
 };
+
+// exports.updateProfile = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.userId);
+
+//     if (!user) {
+//       return res.status(404).json({
+//         message: "User not found",
+//       });
+//     }
+
+//     const { name, phone, address } = req.body;
+
+//     if (name) user.name = name;
+//     if (phone) user.phone = phone;
+//     if (address) user.address = address;
+
+//     // ✅ IMAGE UPLOAD
+//     if (req.file) {
+//       const imageUrl = `${req.protocol}://${req.get(
+//         "host"
+//       )}/uploads/${req.file.filename}`;
+
+//       user.profileImage = imageUrl;
+//     }
+
+//     await user.save();
+
+//     res.status(200).json({
+//       message: "Profile updated",
+//       user,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({
+//       message: "Server error",
+//     });
+//   }
+// };
 exports.forgotPassword = async (req, res) => {
   try {
     const { phone } = req.body;
