@@ -274,12 +274,10 @@ exports.updateProfile = async (req, res) => {
     if (address) user.address = address;
 
     if (req.file) {
-      // 🔥 IMPORTANT: USE YOUR IP HERE (NOT localhost)
-      const BASE_URL = "https://myapp-backend-vtdw.onrender.com/api/auth/profile";
+  const BASE_URL = "https://myapp-backend-vtdw.onrender.com";
 
-      user.profileImage = `${BASE_URL}/uploads/${req.file.filename}`;
-    }
-
+  user.profileImage = `${BASE_URL}/uploads/${req.file.filename}`;
+}
     await user.save();
 
     res.json({
