@@ -249,7 +249,11 @@ exports.getProfile = async (req, res) => {
 // };
 exports.updateProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    console.log("USER:", req.user);
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
+    const user = await User.findById(req.user?.id || req.userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -259,16 +263,17 @@ exports.updateProfile = async (req, res) => {
     if (req.body.phone) user.phone = req.body.phone;
     if (req.body.address) user.address = req.body.address;
 
-    // IMAGE
     if (req.file) {
       user.profileImage = `/uploads/${req.file.filename}`;
     }
 
     await user.save();
 
-    res.json({ user });
+    return res.json({ user });
+
   } catch (err) {
-    res.status(500).json({ message: "Update failed" });
+    console.log("UPDATE ERROR:", err);
+    return res.status(500).json({ message: "Update failed" });
   }
 };
 
