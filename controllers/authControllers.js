@@ -181,71 +181,97 @@ exports.resetPassword = async (req, res) => {
   }
 };
 // DELETE PROFILE 
+// 
 exports.deleteProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    await User.findByIdAndDelete(req.userId);
-
-    res.json({ message: "User deleted successfully" });
-
-  } catch (error) {
-    console.log("DELETE ERROR:", error);
-    res.status(500).json({ message: error.message });
+    await User.findByIdAndDelete(req.user.id);
+    res.json({ message: "Account deleted" });
+  } catch (err) {
+    res.status(500).json({ message: "Delete failed" });
   }
 };
+// exports.getProfile = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.userId).select("-password");
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     res.json(user);
+
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 exports.getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select("-password");
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const user = await User.findById(req.user.id).select("-password");
 
     res.json(user);
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 //  UPDATE PROFILE
+// exports.updateProfile = async (req, res) => {
+//   try {
+//     console.log("USER ID:", req.userId);
+
+//     if (!req.userId) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
+
+//     const user = await User.findById(req.userId);
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     const { name, phone, address } = req.body;
+
+//     user.name = name;
+//     user.phone = phone;
+//     user.address = address;
+
+//     await user.save();
+
+//     return res.json({
+//       message: "Profile updated successfully",
+//       user,
+//     });
+//   } catch (err) {
+//     console.log("UPDATE ERROR:", err);
+//     return res.status(500).json({
+//       message: err.message || "Something went wrong",
+//     });
+//   }
+// };
 exports.updateProfile = async (req, res) => {
   try {
-    console.log("USER ID:", req.userId);
-
-    if (!req.userId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const { name, phone, address } = req.body;
+    if (req.body.name) user.name = req.body.name;
+    if (req.body.phone) user.phone = req.body.phone;
+    if (req.body.address) user.address = req.body.address;
 
-    user.name = name;
-    user.phone = phone;
-    user.address = address;
+    // IMAGE
+    if (req.file) {
+      user.profileImage = `/uploads/${req.file.filename}`;
+    }
 
     await user.save();
 
-    return res.json({
-      message: "Profile updated successfully",
-      user,
-    });
+    res.json({ user });
   } catch (err) {
-    console.log("UPDATE ERROR:", err);
-    return res.status(500).json({
-      message: err.message || "Something went wrong",
-    });
+    res.status(500).json({ message: "Update failed" });
   }
 };
+
 // exports.updateProfile = async (req, res) => {
 //   try {
 //     console.log(req.body);

@@ -23,11 +23,11 @@ router.get(
 );
 
 router.put(
-  "/update-profile",
-  protect,
+  "/profile",authMiddleware,
   upload.single("profileImage"),
-  authController.updateProfile
+  updateProfile
 );
+
 
 router.delete(
   "/delete-profile",
