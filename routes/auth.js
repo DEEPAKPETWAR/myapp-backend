@@ -10,6 +10,7 @@ const {
 } = require("../controllers/authControllers");
 const upload =require("../middleware/upload")
 const authMiddleware = require("../middleware/authMiddleware");
+const protect = require("../middleware/authMiddleware");
 
 router.post("/register", authController.register);
 
@@ -23,10 +24,11 @@ router.get(
 
 router.put(
   "/update-profile",
-  authMiddleware,
+  protect,
   upload.single("profileImage"),
   authController.updateProfile
 );
+
 router.delete(
   "/delete-profile",
   authMiddleware,
