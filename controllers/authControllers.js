@@ -212,7 +212,7 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
- UPDATE PROFILE
+//  UPDATE PROFILE
 exports.updateProfile = async (req, res) => {
   try {
     console.log("USER ID:", req.userId);
