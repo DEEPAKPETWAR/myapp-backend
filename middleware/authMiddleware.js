@@ -15,13 +15,15 @@ const authMiddleware = (req, res, next) => {
     const token = authHeader.split(" ")[1];
 
     // 3. Verify token
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    console.log("Decoded Token:", decoded);
+req.userId = decoded.id;
 
+if (!req.userId) {
+  return res.status(401).json({
+    message: "Invalid token payload",
+  });
+}
     // 4. IMPORTANT: set correct user id
     req.userId = decoded.id;
 
