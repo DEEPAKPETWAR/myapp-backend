@@ -274,10 +274,12 @@ exports.updateProfile = async (req, res) => {
     if (address) user.address = address;
 
     if (req.file) {
-  const BASE_URL = "https://myapp-backend-vtdw.onrender.com";
+      // 🔥 IMPORTANT: USE YOUR IP HERE (NOT localhost)
+      const BASE_URL = "https://myapp-backend-vtdw.onrender.com/api/auth/profile";
 
-  user.profileImage = `${BASE_URL}/uploads/${req.file.filename}`;
-}
+      user.profileImage = `${BASE_URL}/uploads/${req.file.filename}`;
+    }
+
     await user.save();
 
     res.json({
@@ -285,10 +287,13 @@ exports.updateProfile = async (req, res) => {
       user,
     });
 
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Server error" });
-  }
+  } catch (error) {
+  console.log("🔥 FULL ERROR:", error);
+  return res.status(500).json({
+    message: error.message,
+    stack: error.stack,
+  });
+}
 };
 exports.forgotPassword = async (req, res) => {
   try {
