@@ -24,6 +24,7 @@ router.get(
 router.put(
   "/profile",
   authMiddleware,
+  upload.single("profileImage"),
   updateProfile
 );
 
