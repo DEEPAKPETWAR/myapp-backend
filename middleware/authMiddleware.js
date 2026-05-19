@@ -23,6 +23,5 @@ const authMiddleware = (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 };
-console.log("TOKEN:", token);
-console.log("DECODED:", decoded);
+
 module.exports = authMiddleware;
