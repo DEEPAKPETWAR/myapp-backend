@@ -264,9 +264,7 @@ exports.updateProfile = async (req, res) => {
     const user = await User.findById(req.userId);
 
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const { name, phone, address } = req.body;
@@ -275,26 +273,23 @@ exports.updateProfile = async (req, res) => {
     if (phone) user.phone = phone;
     if (address) user.address = address;
 
-    // ✅ IMAGE UPLOAD
     if (req.file) {
-      const imageUrl = `${req.protocol}://${req.get(
-        "host"
-      )}/uploads/${req.file.filename}`;
+      // 🔥 IMPORTANT: USE YOUR IP HERE (NOT localhost)
+      const BASE_URL = "https://myapp-backend-vtdw.onrender.com/api/auth/profile";
 
-      user.profileImage = imageUrl;
+      user.profileImage = `${BASE_URL}/uploads/${req.file.filename}`;
     }
 
     await user.save();
 
-    res.status(200).json({
+    res.json({
       message: "Profile updated",
       user,
     });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Server error",
-    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 exports.forgotPassword = async (req, res) => {
