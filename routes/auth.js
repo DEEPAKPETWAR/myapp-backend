@@ -10,7 +10,7 @@ const {
 } = require("../controllers/authControllers");
 
 const authMiddleware = require("../middleware/authMiddleware");
-
+const upload =require("../middleware/upload")
 router.post("/register", authController.register);
 
 router.post("/login", authController.login);
