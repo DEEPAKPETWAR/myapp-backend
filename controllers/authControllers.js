@@ -213,54 +213,10 @@ exports.getProfile = async (req, res) => {
   }
 };
 //  UPDATE PROFILE
-exports.updateProfile = async (req, res) => {
-  try {
-    const { name, phone, address } = req.body;
-
-    const user = await User.findById(req.userId);
-
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-
-    // optional phone duplicate check
-    if (phone && phone !== user.phone) {
-      const exists = await User.findOne({
-        phone,
-      });
-
-      if (exists) {
-        return res.status(400).json({
-          message: "Phone already exists",
-        });
-      }
-    }
-
-    user.name = name || user.name;
-    user.phone = phone || user.phone;
-    user.address = address || user.address;
-
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Profile updated successfully",
-      user,
-    });
-
-  } catch (error) {
-    console.log("UPDATE ERROR:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
-  }
-};
 // exports.updateProfile = async (req, res) => {
 //   try {
+//     const { name, phone, address } = req.body;
+
 //     const user = await User.findById(req.userId);
 
 //     if (!user) {
@@ -269,34 +225,78 @@ exports.updateProfile = async (req, res) => {
 //       });
 //     }
 
-//     const { name, phone, address } = req.body;
+//     // optional phone duplicate check
+//     if (phone && phone !== user.phone) {
+//       const exists = await User.findOne({
+//         phone,
+//       });
 
-//     if (name) user.name = name;
-//     if (phone) user.phone = phone;
-//     if (address) user.address = address;
-
-//     // ✅ IMAGE UPLOAD
-//     if (req.file) {
-//       const imageUrl = `${req.protocol}://${req.get(
-//         "host"
-//       )}/uploads/${req.file.filename}`;
-
-//       user.profileImage = imageUrl;
+//       if (exists) {
+//         return res.status(400).json({
+//           message: "Phone already exists",
+//         });
+//       }
 //     }
+
+//     user.name = name || user.name;
+//     user.phone = phone || user.phone;
+//     user.address = address || user.address;
 
 //     await user.save();
 
 //     res.status(200).json({
-//       message: "Profile updated",
+//       success: true,
+//       message: "Profile updated successfully",
 //       user,
 //     });
+
 //   } catch (error) {
-//     console.log(error);
+//     console.log("UPDATE ERROR:", error);
+
 //     res.status(500).json({
+//       success: false,
 //       message: "Server error",
 //     });
 //   }
 // };
+exports.updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const { name, phone, address } = req.body;
+
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    if (address) user.address = address;
+
+    // ✅ IMAGE UPLOAD
+    if (req.file) {
+      const imageUrl = `${req.protocol}://${req.get(
+        "host"
+      )}/uploads/${req.file.filename}`;
+
+      user.profileImage = imageUrl;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile updated",
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
 exports.forgotPassword = async (req, res) => {
   try {
     const { phone } = req.body;
