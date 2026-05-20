@@ -261,39 +261,52 @@ exports.getProfile = async (req, res) => {
 // };
 exports.updateProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+    console.log("USER:", req.userId);
+
+    const user = await User.findById(
+      req.userId
+    );
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
 
-    const { name, phone, address } = req.body;
+    const { name, phone, address } =
+      req.body;
 
     if (name) user.name = name;
     if (phone) user.phone = phone;
     if (address) user.address = address;
 
     if (req.file) {
-      // 🔥 IMPORTANT: USE YOUR IP HERE (NOT localhost)
-      const BASE_URL = "https://myapp-backend-vtdw.onrender.com/api/auth/profile";
+      const BASE_URL =
+        `${req.protocol}://${req.get("host")}`;
 
-      user.profileImage = `${BASE_URL}/uploads/${req.file.filename}`;
+      user.profileImage =
+        `${BASE_URL}/uploads/${req.file.filename}`;
     }
 
     await user.save();
 
-    res.json({
+    return res.status(200).json({
       message: "Profile updated",
       user,
     });
 
   } catch (error) {
-  console.log("🔥 FULL ERROR:", error);
-  return res.status(500).json({
-    message: error.message,
-    stack: error.stack,
-  });
-}
+    console.log(
+      "🔥 UPDATE ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
 };
 exports.forgotPassword = async (req, res) => {
   try {

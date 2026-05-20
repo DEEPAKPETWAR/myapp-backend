@@ -2,17 +2,16 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Create uploads folder automatically if missing
-const uploadDir = "uploads";
+// create uploads folder automatically
+const uploadPath = "uploads";
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
 }
 
-// Storage config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);
+    cb(null, uploadPath);
   },
 
   filename: (req, file, cb) => {
@@ -29,37 +28,18 @@ const storage = multer.diskStorage({
   },
 });
 
-// Image validation
 const fileFilter = (req, file, cb) => {
-  const allowedTypes =
-    /jpeg|jpg|png|webp/;
-
-  const extname = allowedTypes.test(
-    path.extname(file.originalname).toLowerCase()
-  );
-
-  const mimetype = allowedTypes.test(
-    file.mimetype
-  );
-
-  if (extname && mimetype) {
-    return cb(null, true);
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files allowed"));
   }
-
-  cb(
-    new Error(
-      "Only jpg, jpeg, png, webp images allowed"
-    )
-  );
 };
 
-// Export multer
-const upload = multer({
+module.exports = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
+    fileSize: 5 * 1024 * 1024,
   },
 });
-
-module.exports = upload;
