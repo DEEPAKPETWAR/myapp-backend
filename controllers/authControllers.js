@@ -133,24 +133,50 @@ exports.verifyOtp = async (req, res) => {
   try {
     const { phone, otp } = req.body;
 
+    if (!phone || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone and OTP are required",
+      });
+    }
+
     const user = await User.findOne({ phone });
 
-    if (!user || user.resetOtp !== otp) {
-      return res.status(400).json({ message: "Invalid OTP" });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
-    if (user.resetOtpExpiry < new Date()) {
-      return res.status(400).json({ message: "OTP expired" });
+    if (user.resetOtp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
     }
 
-    res.json({ message: "OTP verified" });
+    if (Date.now() > user.resetOtpExpiry) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP expired",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "OTP verified",
+    });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
-
-
 //  RESET PASSWORD 
 exports.resetPassword = async (req, res) => {
   try {
