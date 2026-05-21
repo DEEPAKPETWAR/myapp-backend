@@ -67,63 +67,53 @@ exports.register = async (req, res) => {
 //  LOGIN
 exports.login = async (req, res) => {
   try {
-    let { email, phone, password } = req.body;
+    const { emailOrPhone, password } = req.body;
 
-    let user = null;
-
-    // Login with email
-    if (email) {
-      email = email.trim().toLowerCase();
-
-      user = await User.findOne({
-        email,
+    if (!emailOrPhone || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email/Phone and password are required",
       });
     }
 
-    // Login with phone
-    else if (phone) {
-      phone = phone.trim();
+    let user;
 
+    if (emailOrPhone.includes("@")) {
       user = await User.findOne({
-        phone,
+        email: emailOrPhone.trim().toLowerCase(),
+      });
+    } else {
+      user = await User.findOne({
+        phone: emailOrPhone.trim(),
       });
     }
 
     if (!user) {
-      return res.status(400).json({
+      return res.status(404).json({
+        success: false,
         message: "User not found",
       });
     }
 
-    const match = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
       return res.status(400).json({
+        success: false,
         message: "Invalid password",
       });
     }
 
     res.status(200).json({
+      success: true,
       message: "Login successful",
       token: generateToken(user._id),
-
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        address: user.address,
-        profileImage: user.profileImage,
-      },
+      user,
     });
 
   } catch (error) {
-    console.log("LOGIN ERROR:", error);
-
     res.status(500).json({
+      success: false,
       message: "Server error",
     });
   }
