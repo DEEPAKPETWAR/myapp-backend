@@ -363,30 +363,54 @@ exports.forgotPassword = async (req, res) => {
   try {
     const { phone } = req.body;
 
+    // Validate phone
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number is required",
+      });
+    }
+
+    // Check user
     const user = await User.findOne({ phone });
 
     if (!user) {
       return res.status(404).json({
+        success: false,
         message: "User not found",
       });
     }
 
-    // Example OTP
-    const otp = "1234";
+    // Generate random 4-digit OTP
+    const otp = Math.floor(
+      1000 + Math.random() * 9000
+    ).toString();
+
+    // OTP expires in 5 mins
+    const expiryTime = Date.now() + 5 * 60 * 1000;
 
     user.resetOtp = otp;
-    user.resetOtpExpiry = Date.now() + 5 * 60 * 1000;
+    user.resetOtpExpiry = expiryTime;
 
     await user.save();
 
-    res.json({
+    
+
+    res.status(200).json({
+      success: true,
       message: "OTP sent successfully",
+
+      
       otp,
     });
 
   } catch (error) {
+    console.log("FORGOT PASSWORD ERROR:", error);
+
     res.status(500).json({
-      message: error.message,
+      success: false,
+      message: "Something went wrong",
+      error: error.message,
     });
   }
 };
