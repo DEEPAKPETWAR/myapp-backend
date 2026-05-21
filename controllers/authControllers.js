@@ -6,47 +6,55 @@ const generateToken = require("../utility/generateToken");
 
 exports.register = async (req, res) => {
   try {
-    let { name, email, password, phone, address } =
-      req.body;
+    let { name, email, password, phone, address } = req.body;
 
+    // Validation
     if (!name || !email || !password || !phone) {
       return res.status(400).json({
+        success: false,
         message: "All fields required",
       });
     }
 
-    // Normalize values
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters",
+      });
+    }
+
+    // Normalize
     email = email.trim().toLowerCase();
     phone = phone.trim();
 
+    // Check duplicate user
     const existingUser = await User.findOne({
       $or: [{ email }, { phone }],
     });
 
     if (existingUser) {
       return res.status(400).json({
-        message:
-          "User already exists with email or phone",
+        success: false,
+        message: "User already exists with email or phone",
       });
     }
 
-    const hashedPassword = await bcrypt.hash(
-      password,
-      10
-    );
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create user
     const user = await User.create({
-      name,
+      name: name.trim(),
       email,
       password: hashedPassword,
       phone,
-      address,
+      address: address?.trim() || "",
     });
 
-    res.status(201).json({
+    return res.status(201).json({
+      success: true,
       message: "Registration successful",
       token: generateToken(user._id),
-
       user: {
         _id: user._id,
         name: user.name,
@@ -59,7 +67,8 @@ exports.register = async (req, res) => {
   } catch (error) {
     console.log("REGISTER ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
+      success: false,
       message: "Server error",
     });
   }
@@ -69,47 +78,50 @@ exports.login = async (req, res) => {
   try {
     let { email, phone, password } = req.body;
 
-    let user = null;
+    // Validation
+    if ((!email && !phone) || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email/Phone and password are required",
+      });
+    }
 
-    // Login with email
+    let user;
+
+    // EMAIL LOGIN
     if (email) {
       email = email.trim().toLowerCase();
 
-      user = await User.findOne({
-        email,
-      });
+      user = await User.findOne({ email });
     }
 
-    // Login with phone
-    else if (phone) {
+    // PHONE LOGIN
+    else {
       phone = phone.trim();
 
-      user = await User.findOne({
-        phone,
-      });
+      user = await User.findOne({ phone });
     }
 
     if (!user) {
-      return res.status(400).json({
+      return res.status(404).json({
+        success: false,
         message: "User not found",
       });
     }
 
-    const match = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
       return res.status(400).json({
+        success: false,
         message: "Invalid password",
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
+      success: true,
       message: "Login successful",
       token: generateToken(user._id),
-
       user: {
         _id: user._id,
         name: user.name,
@@ -123,7 +135,8 @@ exports.login = async (req, res) => {
   } catch (error) {
     console.log("LOGIN ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
+      success: false,
       message: "Server error",
     });
   }
