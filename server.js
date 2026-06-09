@@ -26,7 +26,7 @@ app.use(
   )
 );
 app.use("/api/auth", require("./routes/auth"));
-app.use("/api", require("./routes/otproutes"));
+app.use("/api", require("./routes/otpRoutes"));
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/reports', summaryRoutes);
 // DB
